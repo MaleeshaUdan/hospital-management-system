@@ -42,5 +42,22 @@ jobs:
         DB_CONNECTION: sqlite
         DB_DATABASE: database/database.sqlite
       run: vendor/bin/phpunit
+
+  laravel-pint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+    - name: Install Dependencies
+      run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
     - name: Run Laravel Pint
-      run: vendor/bin/pint --test
+      run: vendor/bin/pint --test -v
+    - name: Print Pint Results
+      if: failure()
+      run: |
+        echo "Laravel Pint found style issues. Here are the affected files:"
+        vendor/bin/pint --test -v | grep "⨯" | awk '{print $2}'
+        echo "To fix these issues, run 'vendor/bin/pint' locally."
